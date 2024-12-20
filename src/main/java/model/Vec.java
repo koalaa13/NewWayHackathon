@@ -40,6 +40,22 @@ public class Vec {
         return new Point(List.of((int) x, (int) y, (int) z));
     }
 
+    int BC = 30;
+
+    public Vec prevBlockStart() {
+        return new Vec(
+                Math.max(x / BC * BC - BC, 0),
+                Math.max(y / BC * BC - BC, 0),
+                Math.max(z / BC * BC - BC, 0));
+    }
+
+    public Vec nextBlockEnd(Vec mapSize) {
+        return new Vec(
+                Math.min(x / BC * BC + 2L * BC, mapSize.x) - 1,
+                Math.min(y / BC * BC + 2L * BC, mapSize.y) - 1,
+                Math.min(z / BC * BC + 2L * BC, mapSize.z) - 1);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

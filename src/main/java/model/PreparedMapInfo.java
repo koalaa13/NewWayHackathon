@@ -15,8 +15,10 @@ public class PreparedMapInfo {
     public PreparedMapInfo(MapInfoDTO mapInfoDTO) {
         mapSize = new Vec(mapInfoDTO.mapSize);
         fences = mapInfoDTO.fences.stream().map(Vec::new).toList();
-        snakes = mapInfoDTO.snakes.stream().map(PlayerSnake::new).toList();
-        enemies = mapInfoDTO.enemies.stream().map(Snake::new).toList();
+        snakes = mapInfoDTO.snakes.stream()
+                .filter(s -> s.status.equals("alive")).map(PlayerSnake::new).toList();
+        enemies = mapInfoDTO.enemies.stream()
+                .filter(s -> s.status.equals("alive")).map(Snake::new).toList();
         food = mapInfoDTO.food.stream().map(Food::new).toList();
     }
 }

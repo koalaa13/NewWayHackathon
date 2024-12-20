@@ -18,12 +18,9 @@ public class Main {
             var preparedMapInfo = new PreparedMapInfo(mapInfo);
             var request = new RequestDTO();
             var snakesDirections = new ArrayList<RequestItemDTO>();
-            for (var snake : mapInfo.snakes) {
-                var worldCoverage = new WorldCoverage(new PlayerSnake(snake), preparedMapInfo);
-                if (snake.status.equals("dead")) {
-                    System.out.println("Snake " + snake.id + " dead. Skipped");
-                    continue;
-                }
+            System.out.println(preparedMapInfo.snakes.size() + " alive snakes");
+            for (var snake : preparedMapInfo.snakes) {
+                var worldCoverage = new WorldCoverage(snake, preparedMapInfo);
                 var requestItem = new RequestItemDTO();
                 requestItem.id = snake.id;
                 requestItem.direction = worldCoverage.getDirection().toPoint();
