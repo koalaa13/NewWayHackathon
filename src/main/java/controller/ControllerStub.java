@@ -5,6 +5,7 @@ import java.util.List;
 
 import model.Point;
 import model.dto.EnemySnakeDTO;
+import model.dto.FoodDTO;
 import model.dto.MapInfoDTO;
 import model.dto.MineSnakeDTO;
 import model.dto.request.RequestDTO;
@@ -32,6 +33,12 @@ public class ControllerStub implements IController {
         enemySnake.geometry = new ArrayList<>();
         enemySnake.geometry.add(new Point(List.of(7, 7, 7)));
         res.enemies.add(enemySnake);
+
+        res.food = new ArrayList<>();
+        var food = new FoodDTO();
+        food.c = new Point(List.of(3, 3, 33));
+        food.points = 33;
+        res.food.add(food);
 
         return res;
     }
