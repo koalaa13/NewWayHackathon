@@ -12,7 +12,7 @@ import movement.WorldCoverage;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        Controller controller = new Controller(true);
+        Controller controller = new Controller(true, true);
         while (true) {
             var mapInfo = controller.getMapInfo();
             var preparedMapInfo = new PreparedMapInfo(mapInfo);
@@ -20,17 +20,16 @@ public class Main {
             var snakesDirections = new ArrayList<RequestItemDTO>();
             for (var snake : mapInfo.snakes) {
                 var worldCoverage = new WorldCoverage(new PlayerSnake(snake), preparedMapInfo);
+                if (snake.status.equals("dead")) {
+                    System.out.println("Snake " + snake.id + " dead. Skipped");
+                    continue;
+                }
                 var requestItem = new RequestItemDTO();
                 requestItem.id = snake.id;
                 requestItem.direction = worldCoverage.getDirection().toPoint();
                 snakesDirections.add(requestItem);
             }
-
             request.snakes = snakesDirections;
-
-            mapInfo = controller.getMapInfo(request);
-            System.out.println(mapInfo.snakes.get(0).id);
-            System.out.println(mapInfo.snakes.get(0).geometry);
             var mapAfterRequest = controller.getMapInfo(request);
             System.out.println("Errors: " + String.join(" | ", mapAfterRequest.errors));
             Thread.sleep(mapAfterRequest.tickRemainMs);

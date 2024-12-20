@@ -4,8 +4,6 @@ import model.PlayerSnake;
 import model.Point;
 import model.PreparedMapInfo;
 import model.Vec;
-import model.dto.MapInfoDTO;
-import model.dto.MineSnakeDTO;
 
 import java.util.Map;
 
