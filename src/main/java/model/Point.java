@@ -11,6 +11,7 @@ import controller.PointSerializer;
 @JsonSerialize(using = PointSerializer.class)
 public class Point {
     public List<Integer> coors;
+
     public Point(List<Integer> coors) {
         this.coors = coors;
     }
