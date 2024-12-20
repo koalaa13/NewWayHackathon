@@ -15,4 +15,5 @@ public class MapInfoDTO {
     public int turn;
     public int reviveTimeoutSec;
     public int tickRemainMs;
+    public List<String> errors;
 }

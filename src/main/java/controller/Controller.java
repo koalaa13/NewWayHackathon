@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.dto.MapInfoDTO;
 import model.dto.request.RequestDTO;
+import model.dto.request.RequestItemDTO;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -55,5 +56,9 @@ public class Controller implements IController {
             System.err.println(e);
         }
         return null;
+    }
+
+    public MapInfoDTO getMapInfo() {
+        return getMapInfo(new RequestDTO());
     }
 }
