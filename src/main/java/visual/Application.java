@@ -3,35 +3,21 @@ package visual;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller.ControllerStub;
+import controller.Controller;
 import javafx.animation.AnimationTimer;
-import javafx.animation.Interpolator;
-import javafx.animation.RotateTransition;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Camera;
+import javafx.geometry.Point3D;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ToolBar;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.paint.Stop;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.CullFace;
-import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import model.Point;
 import model.dto.MapInfoDTO;
 import model.dto.MineSnakeDTO;
@@ -43,7 +29,7 @@ public class Application extends javafx.application.Application {
 
     private MapInfoDTO getMapInfo() {
         // TODO change
-        return new ControllerStub().getMapInfo(null);
+        return new Controller(true, true).getMapInfo(null);
     }
 
     private final static int CAMERA_OFFSET = 20;
@@ -51,6 +37,9 @@ public class Application extends javafx.application.Application {
     private double cameraX = 0;
     private double cameraY = 0;
     private double cameraZ = 0;
+    private double cameraRotateZ = 0;
+    private double cameraRotateX = 0;
+    private double cameraRotateY = 0;
 
     private void setCameraPosition(MapInfoDTO mapInfoDTO) {
         MineSnakeDTO alive = mapInfoDTO.snakes.stream().filter(s -> s.status.equals("alive"))
@@ -63,12 +52,12 @@ public class Application extends javafx.application.Application {
             return;
         }
         Point head = alive.geometry.get(0);
-        cameraX = 0;
-        cameraY = 0;
-        cameraZ = 0;
-//        cameraX = head.coors.get(0) - CAMERA_OFFSET;
-//        cameraY = head.coors.get(1);
-//        cameraZ = head.coors.get(2);
+//        cameraX = 0;
+//        cameraY = 0;
+//        cameraZ = 0;
+        cameraX = head.coors.get(0);
+        cameraY = head.coors.get(1);
+        cameraZ = head.coors.get(2);
     }
 
     private final static PhongMaterial ENEMY_COLOR = new PhongMaterial(Color.RED);
@@ -126,6 +115,30 @@ public class Application extends javafx.application.Application {
         return res;
     }
 
+    private void matrixRotateNode(Node n, double alf, double bet, double gam) {
+        double A11 = Math.cos(alf) * Math.cos(gam);
+        double A12 = Math.cos(bet) * Math.sin(alf) + Math.cos(alf) * Math.sin(bet) * Math.sin(gam);
+        double A13 = Math.sin(alf) * Math.sin(bet) - Math.cos(alf) * Math.cos(bet) * Math.sin(gam);
+        double A21 = -Math.cos(gam) * Math.sin(alf);
+        double A22 = Math.cos(alf) * Math.cos(bet) - Math.sin(alf) * Math.sin(bet) * Math.sin(gam);
+        double A23 = Math.cos(alf) * Math.sin(bet) + Math.cos(bet) * Math.sin(alf) * Math.sin(gam);
+        double A31 = Math.sin(gam);
+        double A32 = -Math.cos(gam) * Math.sin(bet);
+        double A33 = Math.cos(bet) * Math.cos(gam);
+
+        double d = Math.acos((A11 + A22 + A33 - 1d) / 2d);
+        if (d != 0d) {
+            double den = 2d * Math.sin(d);
+            Point3D p = new Point3D((A32 - A23) / den, (A13 - A31) / den, (A21 - A12) / den);
+            n.setRotationAxis(p);
+            n.setRotate(Math.toDegrees(d));
+        }
+    }
+
+    private double getRad(double ang) {
+        return (ang * Math.PI) / 180.0;
+    }
+
     @Override
     public void start(Stage stage) throws Exception {
         boolean is3DSupported = Platform.isSupported(ConditionalFeature.SCENE3D);
@@ -152,14 +165,6 @@ public class Application extends javafx.application.Application {
         Scene scene = new Scene(mainGroup, 1500, 800, true);
         scene.setCamera(camera);
 
-        boolean[] clockwiseRotate = new boolean[]{false};
-        RotateTransition clockwiseRotateTransition = new RotateTransition(Duration.seconds(5), camera);
-        clockwiseRotateTransition.setAxis(Rotate.Y_AXIS);
-        clockwiseRotateTransition.setFromAngle(0);
-        clockwiseRotateTransition.setToAngle(360);
-        clockwiseRotateTransition.setInterpolator(Interpolator.LINEAR);
-        clockwiseRotateTransition.setCycleCount(RotateTransition.INDEFINITE);
-
         // Handle camera movement with key events
         scene.setOnKeyPressed(event -> {
             KeyCode key = event.getCode();
@@ -175,19 +180,30 @@ public class Application extends javafx.application.Application {
                 cameraY -= 1;
             } else if (key == KeyCode.E) {
                 cameraY += 1;
-            } else if (key == KeyCode.R) {
-                clockwiseRotate[0] ^= true;
-                clockwiseRotateTransition.setToAngle(Math.abs(clockwiseRotateTransition.getToAngle()));
-                if (clockwiseRotate[0]) {
-                    clockwiseRotateTransition.play();
-                } else {
-                    clockwiseRotateTransition.pause();
-                }
+            } else if (key == KeyCode.LEFT) {
+                cameraRotateZ -= 10;
+                matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
+            } else if (key == KeyCode.RIGHT) {
+                cameraRotateZ += 10;
+                matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
+            } else if (key == KeyCode.UP) {
+                cameraRotateX += 10;
+                matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
+            } else if (key == KeyCode.DOWN) {
+                cameraRotateX -= 10;
+                matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
+            } else if (key == KeyCode.OPEN_BRACKET) {
+                cameraRotateY -= 10;
+                matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
+            } else if (key == KeyCode.CLOSE_BRACKET) {
+                cameraRotateY += 10;
+                matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
             }
-            System.out.println(cameraX);
-            System.out.println(cameraY);
-            System.out.println(cameraZ);
-            System.out.println("-------------------");
+            System.out.println(camera.getRotationAxis());
+//            System.out.println(cameraX);
+//            System.out.println(cameraY);
+//            System.out.println(cameraZ);
+//            System.out.println("-------------------");
         });
         stage.setScene(scene);
         stage.setTitle("3D Example");
