@@ -20,6 +20,6 @@ public class Snake {
     }
 
     public Vec Head() {
-        return body.get(0);
+        return body.getFirst();
     }
 }
