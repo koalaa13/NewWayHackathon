@@ -1,8 +1,8 @@
 package model.dto;
 
-import java.util.List;
+import model.Point;
 
 public class FoodDTO {
-    public List<Integer> c;
+    public Point c;
     public int points;
 }

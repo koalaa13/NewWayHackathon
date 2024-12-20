@@ -45,12 +45,9 @@ public class Controller {
             MapInfoDTO info = client.execute(request, response -> {
                 var content = response.getEntity().getContent();
                 JsonNode node = objectMapper.readTree(content);
-                if (node.has("errors")) {
-                    var errors = (ArrayNode) node.get("errors");
-                    if (!errors.isEmpty()) {
-                        System.err.println("Some errors!!!!");
-                        System.err.println(errors);
-                    }
+                if (node.has("error")) {
+                    System.err.println("ERROR!!!!");
+                    System.err.println(node.get("error").asText());
                 }
                 return objectMapper.treeToValue(node, MapInfoDTO.class);
             });

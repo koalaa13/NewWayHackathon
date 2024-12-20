@@ -1,11 +1,11 @@
 package model.dto;
 
-import java.util.List;
+import model.Point;
 
 public class MineSnakeDTO extends SnakeDTO {
     public String id;
-    public List<Integer> direction;
-    public List<Integer> oldDirection;
+    public Point direction;
+    public Point oldDirection;
     public int deathCount;
     public int reviveRemainMs;
 }

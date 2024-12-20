@@ -1,8 +1,8 @@
 package model.dto.request;
 
-import java.util.List;
+import model.Point;
 
 public class RequestItemDTO {
     public String id;
-    public List<Integer> direction;
+    public Point direction;
 }
