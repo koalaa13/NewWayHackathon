@@ -5,7 +5,6 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import model.dto.MapInfoDTO;
 import model.dto.request.RequestDTO;
 import org.apache.http.client.methods.HttpPost;
@@ -13,7 +12,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
-public class Controller {
+public class Controller implements IController {
     private static final String TOKEN = "dbc1fb7f-bc4e-438d-8a8d-f3ec945483c9";
     private static final String API_AUTH_HEADER = "X-Auth-Token";
 
