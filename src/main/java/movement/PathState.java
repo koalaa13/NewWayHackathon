@@ -45,7 +45,7 @@ public class PathState {
         }
         Collections.reverse(steps);
         Collections.reverse(cells);
-        return new Path(true, steps, cells);
+        return new Path(true, dist, steps, cells);
     }
 
     @Override

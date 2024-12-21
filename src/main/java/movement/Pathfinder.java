@@ -36,7 +36,7 @@ public class Pathfinder {
                 queue.add(newState);
             }
         }
-        return new Path(false, null, null);
+        return new Path(false, -1L, null, null);
     }
 
     private static boolean isDestinationOccupied(Vec dst, PathState state, Set<Vec> obstacles, List<Snake> snakes) {
