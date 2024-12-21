@@ -167,7 +167,33 @@ public class WorldCoverage {
         return new Pair<>(path.firstDirection, new Pair<>((int) path.dist, prior));
     }
 
+    public Vec moveToCenter() {
+        Vec center = savedMapInfo.mapCenter();
+        Vec diff = center.diff(humanSnake.Head());
+        long dst = center.dist(humanSnake.Head());
+        if (dst < 150) {
+            return null;
+        }
+        List<Vec> cands = new ArrayList<>();
+        if (diff.x > 0) cands.add(VecUtil.XP); else if (diff.x < 0) cands.add(VecUtil.XN);
+        if (diff.y > 0) cands.add(VecUtil.YP); else if (diff.y < 0) cands.add(VecUtil.YN);
+        if (diff.z > 0) cands.add(VecUtil.ZP); else if (diff.z < 0) cands.add(VecUtil.ZN);
+        for (var cand : cands) {
+            var sp = humanSnake.Head().shift(cand);
+            var v = cellInfos.get(sp);
+            if (v != null && !v.blocked) {
+                System.out.println("Move to the center");
+                return cand;
+            }
+        }
+        return null;
+    }
+
     public Vec getDirection() {
+        Vec moveToC = moveToCenter();
+        if (moveToC != null) {
+            return moveToC;
+        }
         List<CellInfo> allFood = new ArrayList<>();
         for (var cell : cellInfos.values()) {
             if (cell.food != null) {
@@ -202,23 +228,6 @@ public class WorldCoverage {
         }
         if (best == null) {
             System.out.println("Best direction is not defined. Choose any safe");
-            Vec center = savedMapInfo.mapCenter();
-            Vec diff = center.diff(humanSnake.Head());
-            long dst = center.dist(humanSnake.Head());
-            if (dst > 100) {
-                List<Vec> cands = new ArrayList<>();
-                if (diff.x > 0) cands.add(VecUtil.XP); else if (diff.x < 0) cands.add(VecUtil.XN);
-                if (diff.y > 0) cands.add(VecUtil.YP); else if (diff.y < 0) cands.add(VecUtil.YN);
-                if (diff.z > 0) cands.add(VecUtil.ZP); else if (diff.z < 0) cands.add(VecUtil.ZN);
-                for (var cand : cands) {
-                    var sp = humanSnake.Head().shift(cand);
-                    var v = cellInfos.get(sp);
-                    if (v != null && !v.blocked) {
-                        System.out.println("Move to the center");
-                        return cand;
-                    }
-                }
-            }
             for (var turn : VecUtil.turns) {
                 var sp = humanSnake.Head().shift(turn);
                 var v = cellInfos.get(sp);
