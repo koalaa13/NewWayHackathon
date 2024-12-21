@@ -167,12 +167,13 @@ public class WorldCoverage {
         return new Pair<>(path.firstDirection, new Pair<>((int) path.dist, prior));
     }
 
-    public Vec moveToCenter() {
-        Vec center = savedMapInfo.mapCenter();
-        Vec diff = center.diff(humanSnake.Head());
-        long dst = center.dist(humanSnake.Head());
-        if (dst < 80 + new Random().nextInt(20)) {
-            return null;
+    public Vec moveToVec(Vec p, boolean notNear) {
+        Vec diff = p.diff(humanSnake.Head());
+        if (notNear) {
+            long dst = p.dist(humanSnake.Head());
+            if (dst < 80 + new Random().nextInt(20)) {
+                return null;
+            }
         }
         List<Vec> cands = new ArrayList<>();
         if (diff.x > 0) cands.add(VecUtil.XP); else if (diff.x < 0) cands.add(VecUtil.XN);
@@ -182,7 +183,7 @@ public class WorldCoverage {
             var sp = humanSnake.Head().shift(cand);
             var v = cellInfos.get(sp);
             if (v != null && !v.blocked) {
-                System.out.println("Move to the center");
+                System.out.println("Move to the p " + p);
                 return cand;
             }
         }
@@ -190,7 +191,7 @@ public class WorldCoverage {
     }
 
     public Vec getDirection() {
-        Vec moveToC = moveToCenter();
+        Vec moveToC = moveToVec(savedMapInfo.mapCenter(), true);
         if (moveToC != null) {
             return moveToC;
         }
@@ -228,6 +229,16 @@ public class WorldCoverage {
         }
         if (best == null) {
             System.out.println("Best direction is not defined. Choose any safe");
+            var mn = savedMapInfo.food.stream().min((o1, o2) ->
+                    Long.compare(o1.c.dist(humanSnake.Head()), o2.c.dist(humanSnake.Head())));
+            if (mn.isPresent()) {
+                var emp = mn.get();
+                var re = moveToVec(emp.c, false);
+                if (re != null) {
+                    System.out.println("MOVE TO ANY FOOD");
+                    return re;
+                }
+            }
             for (var turn : VecUtil.turns) {
                 var sp = humanSnake.Head().shift(turn);
                 var v = cellInfos.get(sp);
