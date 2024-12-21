@@ -171,7 +171,7 @@ public class WorldCoverage {
         Vec center = savedMapInfo.mapCenter();
         Vec diff = center.diff(humanSnake.Head());
         long dst = center.dist(humanSnake.Head());
-        if (dst < 100) {
+        if (dst < 80 + new Random().nextInt(20)) {
             return null;
         }
         List<Vec> cands = new ArrayList<>();
