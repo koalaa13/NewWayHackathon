@@ -10,24 +10,16 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Pathfinder {
-    private static final int MAX_QUEUE_SIZE = 1000000;
-
     public static Map<Vec, Path> findPath(final PlayerSnake initialSnake, Set<Vec> destinations, Vec mapMin, Vec mapMax,
                                 Set<Vec> obstacles, List<Snake> snakes, Function<Vec, Long> cellWeightCalculator) {
         PathState start = new PathState(initialSnake.HeadSnake());
         Map<Vec, Path> paths = new HashMap<>();
         Map<Vec, PathState> best = new HashMap<>();
         TreeSet<PathState> queue = new TreeSet<>(Comparator.comparingLong((PathState a) -> a.dist).thenComparing((PathState a) -> a.snake.id));
-        /*MinMaxPriorityQueue<PathState> queue = MinMaxPriorityQueue
-                .orderedBy(Comparator.comparingLong((PathState a) -> a.dist))
-                .maximumSize(MAX_QUEUE_SIZE)
-                .create();
-        queue.add(start);*/
         queue.add(start);
         best.put(initialSnake.Head(), start);
         while (!queue.isEmpty()) {
             PathState curState = queue.removeFirst();
-            //visited.add(curState.snake.Head());
             if (destinations.contains(curState.snake.Head())) {
                 paths.put(curState.snake.Head(), curState.recover());
             }

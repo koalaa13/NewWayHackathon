@@ -2,6 +2,7 @@ package model;
 
 import model.dto.MineSnakeDTO;
 import util.SnakeUtil;
+import util.VecUtil;
 
 import java.util.*;
 
@@ -81,14 +82,8 @@ public class PlayerSnake extends Snake {
         bodyOrder.put(body.getFirst(), 0);
     }
 
-    public List<Vec> HeadPossibleMoves() {
-        List<Vec> possibleMoves = SnakeUtil.GenerateDirectionalMoves(this);
-        possibleMoves.replaceAll(vec -> Head().shift(vec));
-        return possibleMoves;
-    }
-
     public List<Vec> HeadPossibleDirections() {
-        return SnakeUtil.GenerateDirectionalMoves(this);
+        return VecUtil.turns;
     }
 
     @Override
@@ -103,6 +98,4 @@ public class PlayerSnake extends Snake {
     public int hashCode() {
         return Objects.hash(id);
     }
-
-    // TODO: eat mandarin
 }
