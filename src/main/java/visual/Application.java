@@ -2,8 +2,11 @@ package visual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import controller.ChangingControllerStub;
 import controller.Controller;
+import controller.IController;
 import javafx.animation.AnimationTimer;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -23,13 +26,14 @@ import model.dto.MapInfoDTO;
 import model.dto.MineSnakeDTO;
 
 public class Application extends javafx.application.Application {
+    private static IController controller;
     public static void main(String[] args) {
+        controller = new ChangingControllerStub();
         launch(args);
     }
 
     private MapInfoDTO getMapInfo() {
-        // TODO change
-        return new Controller(true, true).getMapInfo(null);
+        return controller.getMapInfo(null);
     }
 
     private final static int CAMERA_OFFSET = 20;
@@ -147,19 +151,19 @@ public class Application extends javafx.application.Application {
             return;
         }
 
-        MapInfoDTO mapInfoDTO = getMapInfo();
+        MapInfoDTO initMapInfo = getMapInfo();
 
         PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setFarClip(10000);
         camera.setNearClip(0.1);
-        setCameraPosition(mapInfoDTO);
+        setCameraPosition(initMapInfo);
 //        System.out.println(cameraPos.coors);
 //        camera.setTranslateX(cameraPos.coors.get(0));
 //        camera.setTranslateY(cameraPos.coors.get(1));
 //        camera.setTranslateZ(cameraPos.coors.get(2));
 
         var mainGroup = new Group();
-        var boxes = getBoxes(mapInfoDTO);
+        var boxes = getBoxes(initMapInfo);
         mainGroup.getChildren().addAll(boxes);
 
         Scene scene = new Scene(mainGroup, 1500, 800, true);
@@ -199,7 +203,7 @@ public class Application extends javafx.application.Application {
                 cameraRotateY += 10;
                 matrixRotateNode(camera, getRad(cameraRotateX), getRad(cameraRotateY), getRad(cameraRotateZ));
             }
-            System.out.println(camera.getRotationAxis());
+//            System.out.println(camera.getRotationAxis());
 //            System.out.println(cameraX);
 //            System.out.println(cameraY);
 //            System.out.println(cameraZ);
@@ -208,19 +212,21 @@ public class Application extends javafx.application.Application {
         stage.setScene(scene);
         stage.setTitle("3D Example");
 
-//        Thread thread = new Thread(() -> {
-//            for (int i = 0; i < 1000; ++i) {
-//                Platform.runLater(() -> {
-//                    camera.setTranslateX(camera.getTranslateX() + 1);
-//                });
-//                try {
-//                    Thread.sleep(100);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//        thread.start();
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                var newMapInfo = getMapInfo();
+                Platform.runLater(() -> {
+                    mainGroup.getChildren().clear();
+                    mainGroup.getChildren().addAll(getBoxes(newMapInfo));
+                });
+            }
+        });
+        thread.start();
 
         stage.show();
 
