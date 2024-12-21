@@ -36,6 +36,9 @@ public class Pathfinder {
                 }
                 long edgeDist = cellWeightCalculator.apply(possibleMove);
                 if (!best.containsKey(possibleMove) || (best.containsKey(possibleMove) && best.get(possibleMove).dist > curState.dist + edgeDist)) {
+                    if (best.containsKey(possibleMove)) {
+                        queue.remove(best.get(possibleMove));
+                    }
                     best.remove(possibleMove);
                     PathState newState = new PathState(
                             possibleMove,
