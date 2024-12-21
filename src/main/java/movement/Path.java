@@ -7,17 +7,15 @@ import java.util.List;
 public class Path {
     public boolean exist;
     public long dist;
-    public List<Vec> steps;
-    public List<Vec> cells;
+    public Vec firstDirection;
 
     public Path() {
 
     }
 
-    public Path(boolean exist, long dist, List<Vec> steps, List<Vec> cells) {
+    public Path(boolean exist, long dist, Vec firstDirection) {
         this.exist = exist;
         this.dist = dist;
-        this.steps = steps;
-        this.cells = cells;
+        this.firstDirection = firstDirection;
     }
 }

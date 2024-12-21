@@ -9,43 +9,27 @@ import java.util.List;
 import java.util.Objects;
 
 public class PathState {
-    public PlayerSnake snake;
+    public Vec snake;
     public long dist;
-    public PathState parent;
-    public Vec lastMove;
-    public Vec lastDirection;
+    public Vec firstDirection;
     public int stepsMade;
 
-    public PathState(PlayerSnake snake) {
+    public PathState(Vec snake) {
         this.snake = snake;
         this.dist = 0L;
-        this.parent = null;
-        this.lastMove = null;
-        this.lastDirection = null;
+        this.firstDirection = null;
         this.stepsMade = 0;
     }
 
-    public PathState(PlayerSnake snake, long dist, PathState parent, Vec lastMove, Vec lastDirection, int stepsMade) {
+    public PathState(Vec snake, long dist, Vec firstDirection, int stepsMade) {
         this.snake = snake;
         this.dist = dist;
-        this.parent = parent;
-        this.lastMove = lastMove;
-        this.lastDirection = lastDirection;
+        this.firstDirection = firstDirection;
         this.stepsMade = stepsMade;
     }
 
     public Path recover() {
-        List<Vec> steps = new ArrayList<>();
-        List<Vec> cells = new ArrayList<>();
-        PathState state = this;
-        while (state.parent != null) {
-            steps.add(state.lastMove);
-            cells.add(state.lastDirection);
-            state = state.parent;
-        }
-        Collections.reverse(steps);
-        Collections.reverse(cells);
-        return new Path(true, dist, steps, cells);
+        return new Path(true, dist, firstDirection);
     }
 
     @Override

@@ -1,10 +1,9 @@
 package movement;
 
-import com.google.common.collect.MinMaxPriorityQueue;
-
 import model.PlayerSnake;
 import model.Snake;
 import model.Vec;
+import util.VecUtil;
 
 import java.util.*;
 import java.util.function.Function;
@@ -12,42 +11,48 @@ import java.util.function.Function;
 public class Pathfinder {
     public static Map<Vec, Path> findPath(final PlayerSnake initialSnake, Set<Vec> destinations, Vec mapMin, Vec mapMax,
                                 Set<Vec> obstacles, List<Snake> snakes, Function<Vec, Long> cellWeightCalculator) {
-        PathState start = new PathState(initialSnake.HeadSnake());
+        PathState start = new PathState(initialSnake.Head());
         Map<Vec, Path> paths = new HashMap<>();
         Map<Vec, PathState> best = new HashMap<>();
-        TreeSet<PathState> queue = new TreeSet<>(Comparator.comparingLong((PathState a) -> a.dist).thenComparing((PathState a) -> a.snake.id));
+        TreeSet<PathState> queue = new TreeSet<>(
+                Comparator.comparingLong((PathState a) -> a.dist)
+                        .thenComparingLong((PathState a) -> a.snake.x)
+                        .thenComparingLong((PathState a) -> a.snake.y)
+                        .thenComparingLong((PathState a) -> a.snake.z));
         queue.add(start);
         best.put(initialSnake.Head(), start);
         while (!queue.isEmpty()) {
             PathState curState = queue.removeFirst();
-            if (destinations.contains(curState.snake.Head())) {
-                paths.put(curState.snake.Head(), curState.recover());
+            if (destinations.contains(curState.snake)) {
+                paths.put(curState.snake, curState.recover());
             }
             if (paths.size() >= destinations.size()) {
                 break;
             }
-            for (Vec possibleDirection : curState.snake.HeadPossibleDirections()) {
-                Vec possibleMove = curState.snake.Head().shift(possibleDirection);
+            for (Vec possibleDirection : VecUtil.turns) {
+                Vec possibleMove = curState.snake.shift(possibleDirection);
                 if (isDestinationOccupied(possibleMove, curState, obstacles, snakes, mapMin, mapMax)) {
                     continue;
                 }
                 long edgeDist = cellWeightCalculator.apply(possibleMove);
                 if (!best.containsKey(possibleMove) || (best.containsKey(possibleMove) && best.get(possibleMove).dist > curState.dist + edgeDist)) {
                     best.remove(possibleMove);
-                    PlayerSnake newSnake = curState.snake.HeadSnake();
-                    newSnake.Move(possibleDirection);
-                    PathState newState = new PathState(newSnake, curState.dist + edgeDist, curState, possibleDirection, possibleMove, curState.stepsMade + 1);
+                    PathState newState = new PathState(
+                            possibleMove,
+                            curState.dist + edgeDist,
+                            curState.firstDirection == null ? possibleDirection : curState.firstDirection,
+                            curState.stepsMade + 1);
                     queue.add(newState);
                     best.put(possibleMove, newState);
                 }
 
             }
         }
-        for (Vec dst : destinations) {
+        /*for (Vec dst : destinations) {
             if (!paths.containsKey(dst)) {
 //                paths.put(dst, new Path(false, -1L, null, null));
             }
-        }
+        }*/
         return paths;
     }
 
