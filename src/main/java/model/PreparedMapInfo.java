@@ -21,4 +21,8 @@ public class PreparedMapInfo {
                 .filter(s -> s.status.equals("alive")).map(Snake::new).toList();
         food = mapInfoDTO.food.stream().map(Food::new).toList();
     }
+
+    public Vec mapCenter() {
+        return new Vec(mapSize.x / 2, mapSize.y / 2, mapSize.z / 2);
+    }
 }

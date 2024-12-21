@@ -187,11 +187,13 @@ public class WorldCoverage {
         CellInfo best = null;
         double bestReward = 0.0;
         Pair<Vec, Pair<Integer, Double>> bestDir = null;
-        System.out.println("Paths found for " + paths.size() + "/" + allFood.size() + " foods");
+        if (paths.size() <= 1) {
+            System.out.println("Paths found for " + paths.size() + "/" + allFood.size() + " foods");
+        }
         for (var cell : allFood) {
             if (!paths.containsKey(cell.food.c)) continue;
             var res = getPathProps(cell, paths.get(cell.food.c));
-            double reward = cell.food.points * 1.0 / res.getValue().getKey() * res.getValue().getValue();
+            double reward = (cell.food.points + 5 - res.getValue().getKey()) * res.getValue().getValue();
             if (best == null || reward > bestReward) {
                 best = cell;
                 bestDir = res;
@@ -200,6 +202,23 @@ public class WorldCoverage {
         }
         if (best == null) {
             System.out.println("Best direction is not defined. Choose any safe");
+            Vec center = savedMapInfo.mapCenter();
+            Vec diff = center.diff(humanSnake.Head());
+            long dst = center.dist(humanSnake.Head());
+            if (dst > 100) {
+                List<Vec> cands = new ArrayList<>();
+                if (diff.x > 0) cands.add(VecUtil.XP); else if (diff.x < 0) cands.add(VecUtil.XN);
+                if (diff.y > 0) cands.add(VecUtil.YP); else if (diff.y < 0) cands.add(VecUtil.YN);
+                if (diff.z > 0) cands.add(VecUtil.ZP); else if (diff.z < 0) cands.add(VecUtil.ZN);
+                for (var cand : cands) {
+                    var sp = humanSnake.Head().shift(cand);
+                    var v = cellInfos.get(sp);
+                    if (v != null && !v.blocked) {
+                        System.out.println("Move to the center");
+                        return cand;
+                    }
+                }
+            }
             for (var turn : VecUtil.turns) {
                 var sp = humanSnake.Head().shift(turn);
                 var v = cellInfos.get(sp);
@@ -210,7 +229,7 @@ public class WorldCoverage {
             System.out.println("ASSERT. NO MOVES. JUST SKIP");
             return null;
         } else {
-            System.out.println("Selected food: dist=" + bestDir.getValue().getKey());
+//            System.out.println("Selected food: dist=" + bestDir.getValue().getKey());
             {
                 var sp = humanSnake.Head().shift(bestDir.getKey());
                 var v = cellInfos.get(sp);
