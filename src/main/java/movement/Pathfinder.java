@@ -10,23 +10,33 @@ import java.util.*;
 import java.util.function.Function;
 
 public class Pathfinder {
-    private static final int MAX_QUEUE_SIZE = 1000;
+    private static final int MAX_QUEUE_SIZE = 1000000;
 
-    public static Path findPath(final PlayerSnake initialSnake, Vec finish, Set<Vec> obstacles, List<Snake> snakes, Function<Vec, Long> cellWeightCalculator) {
+    public static Map<Vec, Path> findPath(final PlayerSnake initialSnake, Set<Vec> destinations, Vec mapMin, Vec mapMax,
+                                Set<Vec> obstacles, List<Snake> snakes, Function<Vec, Long> cellWeightCalculator) {
         PathState start = new PathState(initialSnake.HeadSnake());
+        Map<Vec, Path> paths = new HashMap<>();
+        Set<Vec> visited = new HashSet<>();
         MinMaxPriorityQueue<PathState> queue = MinMaxPriorityQueue
-                .orderedBy(Comparator.comparingLong((PathState a) -> a.dist).thenComparing((PathState a) -> finish.dist(a.snake.Head())))
+                .orderedBy(Comparator.comparingLong((PathState a) -> a.dist))
                 .maximumSize(MAX_QUEUE_SIZE)
                 .create();
         queue.add(start);
         while (!queue.isEmpty()) {
             PathState curState = queue.poll();
-            if (curState.snake.Head().equals(finish)) {
-                return curState.recover();
+            visited.add(curState.snake.Head());
+            if (destinations.contains(curState.snake.Head())) {
+                paths.put(curState.snake.Head(), curState.recover());
+            }
+            if (paths.size() >= destinations.size()) {
+                break;
             }
             for (Vec possibleDirection : curState.snake.HeadPossibleDirections()) {
                 Vec possibleMove = curState.snake.Head().shift(possibleDirection);
-                if (isDestinationOccupied(possibleMove, curState, obstacles, snakes)) {
+                if (visited.contains(possibleMove)) {
+                    continue;
+                }
+                if (isDestinationOccupied(possibleMove, curState, obstacles, snakes, mapMin, mapMax)) {
                     continue;
                 }
                 long edgeDist = cellWeightCalculator.apply(possibleMove);
@@ -36,10 +46,19 @@ public class Pathfinder {
                 queue.add(newState);
             }
         }
-        return new Path(false, -1L, null, null);
+        for (Vec dst : destinations) {
+            if (!paths.containsKey(dst)) {
+                paths.put(dst, new Path(false, -1L, null, null));
+            }
+        }
+        return paths;
     }
 
-    private static boolean isDestinationOccupied(Vec dst, PathState state, Set<Vec> obstacles, List<Snake> snakes) {
+    private static boolean isDestinationOccupied(Vec dst, PathState state, Set<Vec> obstacles,
+                                                 List<Snake> snakes, Vec mapMin, Vec mapMax) {
+        if (!dst.inRange(mapMin, mapMax)) {
+            return true;
+        }
         if (obstacles.contains(dst)) {
             return true;
         }

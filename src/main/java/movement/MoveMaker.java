@@ -8,7 +8,7 @@ import model.Vec;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,17 +26,20 @@ public class MoveMaker {
         var allSnakes = new ArrayList<Snake>();
         allSnakes.addAll(mapInfo.snakes);
         allSnakes.addAll(mapInfo.enemies);
-        Path path = Pathfinder.findPath(
+        Map<Vec, Path> paths = Pathfinder.findPath(
                 snake,
-                destination.get(0),
+                new HashSet<Vec>(destination),
+                min,
+                max,
                 new HashSet<>(mapInfo.fences),
                 allSnakes,
                 cellWeightCalculator);
-        if (!path.exist) {
+        /*if (!path.exist) {
             return null;
         }
 //        snake.Move(path.steps.getFirst());
-        return path;
+        return path;*/
+        return null;
     }
 
     public static boolean makeRandomPossibleMove(PlayerSnake snake) {
