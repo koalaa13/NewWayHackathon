@@ -23,17 +23,11 @@ public class Controller implements IController {
 
     private boolean isTest;
     private ObjectMapper objectMapper;
-    private boolean fromStaticFile;
 
     public Controller(boolean isTest) {
-        this(isTest, false);
-    }
-
-    public Controller(boolean isTest, boolean fromStaticFile) {
         this.isTest = isTest;
         this.objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        this.fromStaticFile = fromStaticFile;
     }
 
     private String getUrl() {
@@ -42,19 +36,7 @@ public class Controller implements IController {
                 "https://games.datsteam.dev";
     }
 
-    private MapInfoDTO readFromStaticFile() {
-        try (var reader = new BufferedReader(new FileReader("example_response.json"))) {
-            JsonNode node = objectMapper.readTree(reader);
-            return objectMapper.treeToValue(node, MapInfoDTO.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public MapInfoDTO getMapInfo(RequestDTO requestDTO) {
-        if (fromStaticFile) {
-            return readFromStaticFile();
-        }
         final String url = getUrl();
         try (CloseableHttpClient client = HttpClients.createDefault()) {
             final String json = objectMapper.writeValueAsString(requestDTO);

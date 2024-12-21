@@ -12,7 +12,7 @@ import movement.WorldCoverage;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        Controller controller = new Controller(true, true);
+        Controller controller = new Controller(true);
         while (true) {
             var mapInfo = controller.getMapInfo();
             var preparedMapInfo = new PreparedMapInfo(mapInfo);
