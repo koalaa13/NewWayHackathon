@@ -23,4 +23,6 @@ public class VecUtil {
     public static List<Vec> turnsAlongZ() {
         return List.of(XP, XN, YP, YN);
     }
+
+    public static List<Vec> turns = List.of(XP, XN, YP, YN, ZP, ZN);
 }
