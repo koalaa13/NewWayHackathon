@@ -5,8 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
 import controller.Controller;
 import controller.IController;
+import controller.StaticFileController;
 import javafx.animation.AnimationTimer;
 import javafx.application.ConditionalFeature;
 import javafx.application.Platform;
@@ -21,19 +23,29 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.CullFace;
 import javafx.stage.Stage;
+import main.Main;
 import model.Point;
 import model.dto.MapInfoDTO;
 import model.dto.MineSnakeDTO;
 
 public class Application extends javafx.application.Application {
     private static IController controller;
+
     public static void main(String[] args) {
-        controller = new Controller(true);
+        controller = new StaticFileController();
+        new Thread(() -> {
+            try {
+                Main.main(args);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
         launch(args);
     }
 
     private MapInfoDTO getMapInfo() {
-        return controller.getMapInfo(null);
+        return Main.currentMapInfo == null ?
+                controller.getMapInfo(null) : Main.currentMapInfo;
     }
 
     private final static int CAMERA_OFFSET = 20;

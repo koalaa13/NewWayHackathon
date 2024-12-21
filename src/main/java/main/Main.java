@@ -1,11 +1,10 @@
+package main;
+
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import controller.Controller;
+import controller.IController;
 import controller.StaticFileController;
-import model.PlayerSnake;
-import model.Point;
 import model.PreparedMapInfo;
 import model.dto.MapInfoDTO;
 import model.dto.request.RequestDTO;
@@ -16,7 +15,7 @@ public class Main {
     public static MapInfoDTO currentMapInfo = null;
 
     public static void main(String[] args) throws InterruptedException {
-        StaticFileController controller = new StaticFileController();
+        IController controller = new Controller(true);
         while (true) {
             currentMapInfo = controller.getMapInfo();
             long startTime = System.currentTimeMillis();
