@@ -1,17 +1,12 @@
 package controller;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.dto.MapInfoDTO;
 import model.dto.request.RequestDTO;
-import model.dto.request.RequestItemDTO;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -49,6 +44,9 @@ public class Controller implements IController {
             MapInfoDTO info = client.execute(request, response -> {
                 var content = response.getEntity().getContent();
                 JsonNode node = objectMapper.readTree(content);
+                if (node.get("error") != null) {
+                    System.err.println(node.get("error").asText());
+                }
                 return objectMapper.treeToValue(node, MapInfoDTO.class);
             });
             return info;
