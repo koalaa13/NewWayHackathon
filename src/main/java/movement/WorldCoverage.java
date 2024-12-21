@@ -171,7 +171,7 @@ public class WorldCoverage {
         Vec diff = p.diff(humanSnake.Head());
         if (notNear) {
             long dst = p.dist(humanSnake.Head());
-            if (dst < 80 + new Random().nextInt(20)) {
+            if (dst < 100) {
                 return null;
             }
         }
