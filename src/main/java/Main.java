@@ -7,17 +7,20 @@ import controller.StaticFileController;
 import model.PlayerSnake;
 import model.Point;
 import model.PreparedMapInfo;
+import model.dto.MapInfoDTO;
 import model.dto.request.RequestDTO;
 import model.dto.request.RequestItemDTO;
 import movement.WorldCoverage;
 
 public class Main {
+    public static MapInfoDTO currentMapInfo = null;
+
     public static void main(String[] args) throws InterruptedException {
         StaticFileController controller = new StaticFileController();
         while (true) {
-            var mapInfo = controller.getMapInfo();
+            currentMapInfo = controller.getMapInfo();
             long startTime = System.currentTimeMillis();
-            var preparedMapInfo = new PreparedMapInfo(mapInfo);
+            var preparedMapInfo = new PreparedMapInfo(currentMapInfo);
             var request = new RequestDTO();
             var snakesDirections = new ArrayList<RequestItemDTO>();
             System.out.println(preparedMapInfo.snakes.size() + " alive snakes");
