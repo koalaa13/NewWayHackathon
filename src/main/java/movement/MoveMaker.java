@@ -7,6 +7,7 @@ import model.Vec;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ public class MoveMaker {
         this.cellWeightCalculator = cellWeightCalculator;
     }
 
-    public Path makeMoveTowardsTo(PlayerSnake snake, Vec destination, PreparedMapInfo mapInfo) {
+    public Path makeMoveTowardsTo(PlayerSnake snake, Vec min, Vec max, List<Vec> destination, PreparedMapInfo mapInfo) {
         if (snake.Head().equals(destination)) {
             return null;
         }
@@ -27,7 +28,7 @@ public class MoveMaker {
         allSnakes.addAll(mapInfo.enemies);
         Path path = Pathfinder.findPath(
                 snake,
-                destination,
+                destination.get(0),
                 new HashSet<>(mapInfo.fences),
                 allSnakes,
                 cellWeightCalculator);

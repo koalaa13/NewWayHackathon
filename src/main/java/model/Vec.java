@@ -44,7 +44,7 @@ public class Vec {
         return new Point(List.of((int) x, (int) y, (int) z));
     }
 
-    int BC = 30;
+    static int BC = 30;
 
     public Vec prevBlockStart() {
         return new Vec(
@@ -75,5 +75,14 @@ public class Vec {
     @Override
     public int hashCode() {
         return Objects.hash(x, y, z);
+    }
+
+    @Override
+    public String toString() {
+        return "Vec{" +
+                "x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                '}';
     }
 }

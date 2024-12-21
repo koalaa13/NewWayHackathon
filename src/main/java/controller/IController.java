@@ -4,5 +4,9 @@ import model.dto.MapInfoDTO;
 import model.dto.request.RequestDTO;
 
 public interface IController {
-    public MapInfoDTO getMapInfo(RequestDTO requestDTO);
+    MapInfoDTO getMapInfo(RequestDTO requestDTO);
+
+    default MapInfoDTO getMapInfo() {
+        return getMapInfo(new RequestDTO());
+    }
 }

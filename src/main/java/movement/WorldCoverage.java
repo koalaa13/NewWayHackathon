@@ -46,7 +46,8 @@ public class WorldCoverage {
         return fact(n) / (fact(k) * fact(n - k));
     }
 
-    private long pow3(int n) {
+    private long pow3(long n) {
+        if (n > 10) return pow3(10);
         long res = 1;
         for (int i = 1; i <= n; i++) {
             res *= 3;
@@ -76,7 +77,9 @@ public class WorldCoverage {
     private Pair<Integer, List<Food>> getBfsNearestFood(Vec point) {
         int distLimit = -1;
         List<Food> res = new ArrayList<>();
-
+        if (!checkMinMax(point)) {
+            return new Pair<>(distLimit, res);
+        }
         int pos = 0;
         Set<Vec> used = new HashSet<>();
         List<Vec> queueP = new ArrayList<>();
@@ -96,18 +99,26 @@ public class WorldCoverage {
             pos++;
             for (var shift : VecUtil.turns) {
                 var cand = e.shift(shift);
-                if (!used.contains(cand) && e.inRange(min, max) && !cellInfos.get(cand).blocked) {
+                if (!used.contains(cand) && cand.inRange(min, max) && !cellInfos.get(cand).blocked) {
                     queueP.add(cand);
                     queueD.add(d + 1);
+                    used.add(cand);
                 }
             }
         }
         return new Pair<>(distLimit, res);
     }
 
+    private boolean checkMinMax(Vec v) {
+        return v.inRange(min, max);
+    }
+
     private void setBlockBySnake(Snake snake) {
         for (int idx = 0; idx < snake.body.size(); idx++) {
-            cellInfos.get(snake.body.get(idx)).setBlocked(snake.body.size() - idx - 1);
+            var c = snake.body.get(idx);
+            if (checkMinMax(c)) {
+                cellInfos.get(c).setBlocked(snake.body.size() - idx - 1);
+            }
         }
     }
 
@@ -118,6 +129,7 @@ public class WorldCoverage {
         humanSnake = snake;
         savedMapInfo = mapInfo;
         cellInfos = new HashMap<>();
+        System.out.println(min + " " + max);
         for (long x = min.x; x <= max.x; x++) {
             for (long y = min.y; y <= max.y; y++) {
                 for (long z = min.z; z <= max.z; z++) {
@@ -126,11 +138,15 @@ public class WorldCoverage {
             }
         }
         mapInfo.food.forEach(f -> {
-            if (f.c.inRange(min, max)) {
+            if (checkMinMax(f.c)) {
                 cellInfos.get(f.c).food = f;
             }
         });
-        mapInfo.fences.forEach(v -> cellInfos.get(v).setBlocked(10000000));
+        mapInfo.fences.forEach(f -> {
+            if (checkMinMax(f)) {
+                cellInfos.get(f).setBlocked(10000000);
+            }
+        });
         setBlockBySnake(snake);
         mapInfo.enemies.forEach(this::setBlockBySnake);
         mapInfo.enemies.forEach(s -> fillWithProb(s.body.getFirst()));
@@ -146,27 +162,32 @@ public class WorldCoverage {
         });
     }
 
-    public Pair<Vec, Pair<Integer, Double>> getPathProps(Food food) {
+    public Pair<Vec, Pair<Integer, Double>> getPathProps(CellInfo cell) {
         var moveMaker = new MoveMaker(v -> 1L);
-        var path = moveMaker.makeMoveTowardsTo(humanSnake, food.c, savedMapInfo);
-        return null;
+        var path = moveMaker.makeMoveTowardsTo(humanSnake, min, max, List.of(cell.food.c), savedMapInfo);
+        var sz = path.steps.size();
+        long cntBefore = cell.enemyDists.stream().filter(d -> d <= sz).count();
+        double prior = 1.0 / pow3(Math.min(cntBefore, 5L));
+        return new Pair<>(path.steps.getFirst(), new Pair<>((int) path.dist, prior));
     }
 
     public Vec getDirection() {
-        List<Food> allFood = new ArrayList<>();
+        List<CellInfo> allFood = new ArrayList<>();
         for (var cell : cellInfos.values()) {
             if (cell.food != null) {
-                allFood.add(cell.food);
+                allFood.add(cell);
             }
         }
-        Food best = null;
+        CellInfo best = null;
         double bestReward = 0.0;
         Vec bestDir = null;
-        for (var food : allFood) {
-            var res = getPathProps(food);
-            double reward = food.points * 1.0 / res.getValue().getKey() * (1.0 - res.getValue().getValue());
+        System.out.println(allFood.size());
+        for (var cell : allFood) {
+            System.out.println("cell");
+            var res = getPathProps(cell);
+            double reward = cell.food.points * 1.0 / res.getValue().getKey() * res.getValue().getValue();
             if (best == null || reward > bestReward) {
-                best = food;
+                best = cell;
                 bestDir = res.getKey();
                 bestReward = reward;
             }
