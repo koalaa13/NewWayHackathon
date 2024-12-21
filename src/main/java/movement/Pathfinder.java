@@ -16,15 +16,18 @@ public class Pathfinder {
                                 Set<Vec> obstacles, List<Snake> snakes, Function<Vec, Long> cellWeightCalculator) {
         PathState start = new PathState(initialSnake.HeadSnake());
         Map<Vec, Path> paths = new HashMap<>();
-        Set<Vec> visited = new HashSet<>();
-        MinMaxPriorityQueue<PathState> queue = MinMaxPriorityQueue
+        Map<Vec, PathState> best = new HashMap<>();
+        TreeSet<PathState> queue = new TreeSet<>(Comparator.comparingLong((PathState a) -> a.dist).thenComparing((PathState a) -> a.snake.id));
+        /*MinMaxPriorityQueue<PathState> queue = MinMaxPriorityQueue
                 .orderedBy(Comparator.comparingLong((PathState a) -> a.dist))
                 .maximumSize(MAX_QUEUE_SIZE)
                 .create();
+        queue.add(start);*/
         queue.add(start);
+        best.put(initialSnake.Head(), start);
         while (!queue.isEmpty()) {
-            PathState curState = queue.poll();
-            visited.add(curState.snake.Head());
+            PathState curState = queue.removeFirst();
+            //visited.add(curState.snake.Head());
             if (destinations.contains(curState.snake.Head())) {
                 paths.put(curState.snake.Head(), curState.recover());
             }
@@ -33,17 +36,19 @@ public class Pathfinder {
             }
             for (Vec possibleDirection : curState.snake.HeadPossibleDirections()) {
                 Vec possibleMove = curState.snake.Head().shift(possibleDirection);
-                if (visited.contains(possibleMove)) {
-                    continue;
-                }
                 if (isDestinationOccupied(possibleMove, curState, obstacles, snakes, mapMin, mapMax)) {
                     continue;
                 }
                 long edgeDist = cellWeightCalculator.apply(possibleMove);
-                PlayerSnake newSnake = curState.snake.HeadSnake();
-                newSnake.Move(possibleDirection);
-                PathState newState = new PathState(newSnake, curState.dist + edgeDist, curState, possibleDirection, possibleMove, curState.stepsMade + 1);
-                queue.add(newState);
+                if (!best.containsKey(possibleMove) || (best.containsKey(possibleMove) && best.get(possibleMove).dist > curState.dist + edgeDist)) {
+                    best.remove(possibleMove);
+                    PlayerSnake newSnake = curState.snake.HeadSnake();
+                    newSnake.Move(possibleDirection);
+                    PathState newState = new PathState(newSnake, curState.dist + edgeDist, curState, possibleDirection, possibleMove, curState.stepsMade + 1);
+                    queue.add(newState);
+                    best.put(possibleMove, newState);
+                }
+
             }
         }
         for (Vec dst : destinations) {
