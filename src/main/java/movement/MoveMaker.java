@@ -1,10 +1,15 @@
 package movement;
 
 import model.PlayerSnake;
+import model.PreparedMapInfo;
+import model.Snake;
 import model.Vec;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class MoveMaker {
     private Function<Vec, Long> cellWeightCalculator;
@@ -13,16 +18,24 @@ public class MoveMaker {
         this.cellWeightCalculator = cellWeightCalculator;
     }
 
-    public boolean makeMoveTowardsTo(PlayerSnake snake, Vec destination) {
+    public Path makeMoveTowardsTo(PlayerSnake snake, Vec destination, PreparedMapInfo mapInfo) {
         if (snake.Head().equals(destination)) {
-            return false;
+            return null;
         }
-        Path path = Pathfinder.findPath(snake, destination, Set.of(), cellWeightCalculator);
+        var allSnakes = new ArrayList<Snake>();
+        allSnakes.addAll(mapInfo.snakes);
+        allSnakes.addAll(mapInfo.enemies);
+        Path path = Pathfinder.findPath(
+                snake,
+                destination,
+                new HashSet<>(mapInfo.fences),
+                allSnakes,
+                cellWeightCalculator);
         if (!path.exist) {
-            return false;
+            return null;
         }
-        snake.Move(path.steps.getFirst());
-        return true;
+//        snake.Move(path.steps.getFirst());
+        return path;
     }
 
     public static boolean makeRandomPossibleMove(PlayerSnake snake) {

@@ -14,10 +14,12 @@ public class WorldCoverage {
         boolean blocked = false;
         Food food = null;
         List<Integer> enemyDists = new ArrayList<>();
+        int unblockTime = -1;
 
-        public void setBlocked() {
+        public void setBlocked(int unblockTime) {
             probBusy = 1.0;
             blocked = true;
+            this.unblockTime = unblockTime;
         }
 
         public void addAnotherEvent(double prob) {
@@ -26,7 +28,9 @@ public class WorldCoverage {
         }
     }
 
+    private PlayerSnake humanSnake;
     private Map<Vec, CellInfo> cellInfos;
+    private PreparedMapInfo savedMapInfo;
     private Vec min;
     private Vec max;
 
@@ -101,10 +105,18 @@ public class WorldCoverage {
         return new Pair<>(distLimit, res);
     }
 
+    private void setBlockBySnake(Snake snake) {
+        for (int idx = 0; idx < snake.body.size(); idx++) {
+            cellInfos.get(snake.body.get(idx)).setBlocked(snake.body.size() - idx - 1);
+        }
+    }
+
     public WorldCoverage(PlayerSnake snake, PreparedMapInfo mapInfo) {
         var head = snake.Head();
         min = head.prevBlockStart();
         max = head.nextBlockEnd(mapInfo.mapSize);
+        humanSnake = snake;
+        savedMapInfo = mapInfo;
         cellInfos = new HashMap<>();
         for (long x = min.x; x <= max.x; x++) {
             for (long y = min.y; y <= max.y; y++) {
@@ -118,9 +130,9 @@ public class WorldCoverage {
                 cellInfos.get(f.c).food = f;
             }
         });
-        mapInfo.fences.forEach(v -> cellInfos.get(v).setBlocked());
-        mapInfo.snakes.forEach(s -> s.body.forEach(v -> cellInfos.get(v).setBlocked()));
-        mapInfo.enemies.forEach(s -> s.body.forEach(v -> cellInfos.get(v).setBlocked()));
+        mapInfo.fences.forEach(v -> cellInfos.get(v).setBlocked(10000000));
+        setBlockBySnake(snake);
+        mapInfo.enemies.forEach(this::setBlockBySnake);
         mapInfo.enemies.forEach(s -> fillWithProb(s.body.getFirst()));
         mapInfo.enemies.forEach(s -> {
             var h = s.body.getFirst();
@@ -134,7 +146,31 @@ public class WorldCoverage {
         });
     }
 
+    public Pair<Vec, Pair<Integer, Double>> getPathProps(Food food) {
+        var moveMaker = new MoveMaker(v -> 1L);
+        var path = moveMaker.makeMoveTowardsTo(humanSnake, food.c, savedMapInfo);
+        return null;
+    }
+
     public Vec getDirection() {
-        return new Vec(1, 0, 0);
+        List<Food> allFood = new ArrayList<>();
+        for (var cell : cellInfos.values()) {
+            if (cell.food != null) {
+                allFood.add(cell.food);
+            }
+        }
+        Food best = null;
+        double bestReward = 0.0;
+        Vec bestDir = null;
+        for (var food : allFood) {
+            var res = getPathProps(food);
+            double reward = food.points * 1.0 / res.getValue().getKey() * (1.0 - res.getValue().getValue());
+            if (best == null || reward > bestReward) {
+                best = food;
+                bestDir = res.getKey();
+                bestReward = reward;
+            }
+        }
+        return bestDir;
     }
 }

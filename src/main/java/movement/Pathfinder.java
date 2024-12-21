@@ -3,6 +3,7 @@ package movement;
 import com.google.common.collect.MinMaxPriorityQueue;
 
 import model.PlayerSnake;
+import model.Snake;
 import model.Vec;
 
 import java.util.*;
@@ -11,7 +12,7 @@ import java.util.function.Function;
 public class Pathfinder {
     private static final int MAX_QUEUE_SIZE = 1000;
 
-    public static Path findPath(final PlayerSnake initialSnake, Vec finish, Set<Vec> obstacles, Function<Vec, Long> cellWeightCalculator) {
+    public static Path findPath(final PlayerSnake initialSnake, Vec finish, Set<Vec> obstacles, List<Snake> snakes, Function<Vec, Long> cellWeightCalculator) {
         PathState start = new PathState(initialSnake.HeadSnake());
         MinMaxPriorityQueue<PathState> queue = MinMaxPriorityQueue
                 .orderedBy(Comparator.comparingLong((PathState a) -> a.dist).thenComparing((PathState a) -> finish.dist(a.snake.Head())))
@@ -25,7 +26,7 @@ public class Pathfinder {
             }
             for (Vec possibleDirection : curState.snake.HeadPossibleDirections()) {
                 Vec possibleMove = curState.snake.Head().shift(possibleDirection);
-                if (isDestinationOccupied(possibleMove, curState, obstacles, initialSnake)) {
+                if (isDestinationOccupied(possibleMove, curState, obstacles, snakes)) {
                     continue;
                 }
                 long edgeDist = cellWeightCalculator.apply(possibleMove);
@@ -35,19 +36,21 @@ public class Pathfinder {
                 queue.add(newState);
             }
         }
-        return new Path(false, null, null);
+        return new Path(false, -1L, null, null);
     }
 
-    private static boolean isDestinationOccupied(Vec dst, PathState state, Set<Vec> obstacles, PlayerSnake initialSnake) {
+    private static boolean isDestinationOccupied(Vec dst, PathState state, Set<Vec> obstacles, List<Snake> snakes) {
         if (obstacles.contains(dst)) {
             return true;
         }
-        if (!initialSnake.bodyOrder.containsKey(dst)) {
-            return false;
-        } else {
-            int ordNum = initialSnake.bodyOrder.get(dst);
-            int shiftStep = initialSnake.body.size() - ordNum;
-            return state.stepsMade < shiftStep;
+        boolean occupied = false;
+        for (var snake : snakes) {
+            if (snake.bodyOrder.containsKey(dst)) {
+                int ordNum = snake.bodyOrder.get(dst);
+                int shiftStep = snake.body.size() - ordNum + 1;
+                occupied |= state.stepsMade < shiftStep;
+            }
         }
+        return occupied;
     }
 }

@@ -5,6 +5,7 @@ import model.Vec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class PathFinderTest {
@@ -21,7 +22,7 @@ public class PathFinderTest {
         //snake.bodyOrder.put(snake.body.get(1), 1);
 
         snake.direction = new Vec(-1, 0, 0);
-        Path path = Pathfinder.findPath(snake, new Vec(3, 2, 1), Set.of(new Vec(3, 1, 1)), (Vec v) -> 1L);
+        Path path = Pathfinder.findPath(snake, new Vec(3, 2, 1), Set.of(new Vec(3, 1, 1)), List.of(), (Vec v) -> 1L);
         int kek = 0;
     }
 }
