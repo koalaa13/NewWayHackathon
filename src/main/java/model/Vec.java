@@ -44,7 +44,7 @@ public class Vec {
         return new Point(List.of((int) x, (int) y, (int) z));
     }
 
-    static int BC = 30;
+    static int BC = 10;
 
     public Vec prevBlockStart() {
         return new Vec(
