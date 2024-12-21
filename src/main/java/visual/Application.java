@@ -1,10 +1,10 @@
 package visual;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 
-import controller.ChangingControllerStub;
 import controller.Controller;
 import controller.IController;
 import javafx.animation.AnimationTimer;
@@ -28,7 +28,7 @@ import model.dto.MineSnakeDTO;
 public class Application extends javafx.application.Application {
     private static IController controller;
     public static void main(String[] args) {
-        controller = new ChangingControllerStub();
+        controller = new Controller(true);
         launch(args);
     }
 
@@ -68,6 +68,8 @@ public class Application extends javafx.application.Application {
     private final static PhongMaterial WE_COLOR = new PhongMaterial(Color.BLUE);
     private final static PhongMaterial ORANGE_COLOR = new PhongMaterial(Color.ORANGE);
     private final static PhongMaterial WALL_COLOR = new PhongMaterial(Color.GREEN);
+    private final static PhongMaterial BAD_COLOR = new PhongMaterial(Color.MAGENTA);
+    private final static PhongMaterial GOOD_COLOR = new PhongMaterial(Color.BLACK);
     private final static int BOX_SIZE = 1;
 
     private List<Box> getBoxes(MapInfoDTO mapInfoDTO) {
@@ -106,8 +108,32 @@ public class Application extends javafx.application.Application {
             res.add(box);
         });
 
+        Set<Point> has = new HashSet<>();
+        mapInfoDTO.specialFood.golden.forEach(f -> {
+            Box box = new Box(BOX_SIZE, BOX_SIZE, BOX_SIZE);
+            box.setCullFace(CullFace.NONE);
+            box.setTranslateX(f.coors.get(0));
+            box.setTranslateY(f.coors.get(1));
+            box.setTranslateZ(f.coors.get(2));
+            box.setMaterial(GOOD_COLOR);
+            res.add(box);
+            has.add(f);
+        });
+        mapInfoDTO.specialFood.suspicious.forEach(f -> {
+            Box box = new Box(BOX_SIZE, BOX_SIZE, BOX_SIZE);
+            box.setCullFace(CullFace.NONE);
+            box.setTranslateX(f.coors.get(0));
+            box.setTranslateY(f.coors.get(1));
+            box.setTranslateZ(f.coors.get(2));
+            box.setMaterial(BAD_COLOR);
+            res.add(box);
+            has.add(f);
+        });
         mapInfoDTO.food.forEach(f -> {
             var p = f.c;
+            if (has.contains(p)) {
+                return;
+            }
             Box box = new Box(BOX_SIZE, BOX_SIZE, BOX_SIZE);
             box.setCullFace(CullFace.NONE);
             box.setTranslateX(p.coors.get(0));
