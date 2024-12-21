@@ -162,9 +162,7 @@ public class WorldCoverage {
         });
     }
 
-    public Pair<Vec, Pair<Integer, Double>> getPathProps(CellInfo cell) {
-        var moveMaker = new MoveMaker(v -> 1L);
-        var path = moveMaker.makeMoveTowardsTo(humanSnake, min, max, List.of(cell.food.c), savedMapInfo);
+    public Pair<Vec, Pair<Integer, Double>> getPathProps(CellInfo cell, Path path) {
         var sz = path.steps.size();
         long cntBefore = cell.enemyDists.stream().filter(d -> d <= sz).count();
         double prior = 1.0 / pow3(Math.min(cntBefore, 5L));
@@ -178,13 +176,24 @@ public class WorldCoverage {
                 allFood.add(cell);
             }
         }
+        var moveMaker = new MoveMaker(v -> {
+            var t = cellInfos.get(v);
+            if (t != null) {
+                return 1L + (long) (cellInfos.get(v).probBusy * 4L);
+            } else {
+                return 20L;
+            }
+        });
+        var foodCoords = allFood.stream().map(c -> c.food.c).toList();
+        var paths = moveMaker.makeMoveTowardsTo(humanSnake, min, max, foodCoords, savedMapInfo);
         CellInfo best = null;
         double bestReward = 0.0;
         Vec bestDir = null;
         System.out.println(allFood.size());
         for (var cell : allFood) {
             System.out.println("cell");
-            var res = getPathProps(cell);
+            if (!paths.containsKey(cell.food.c)) continue;
+            var res = getPathProps(cell, paths.get(cell.food.c));
             double reward = cell.food.points * 1.0 / res.getValue().getKey() * res.getValue().getValue();
             if (best == null || reward > bestReward) {
                 best = cell;

@@ -19,7 +19,7 @@ public class MoveMaker {
         this.cellWeightCalculator = cellWeightCalculator;
     }
 
-    public Path makeMoveTowardsTo(PlayerSnake snake, Vec min, Vec max, List<Vec> destination, PreparedMapInfo mapInfo) {
+    public Map<Vec, Path> makeMoveTowardsTo(PlayerSnake snake, Vec min, Vec max, List<Vec> destination, PreparedMapInfo mapInfo) {
         if (snake.Head().equals(destination)) {
             return null;
         }
@@ -39,7 +39,7 @@ public class MoveMaker {
         }
 //        snake.Move(path.steps.getFirst());
         return path;*/
-        return null;
+        return paths;
     }
 
     public static boolean makeRandomPossibleMove(PlayerSnake snake) {

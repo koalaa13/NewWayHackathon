@@ -45,7 +45,7 @@ public class Pathfinder {
         }
         for (Vec dst : destinations) {
             if (!paths.containsKey(dst)) {
-                paths.put(dst, new Path(false, -1L, null, null));
+//                paths.put(dst, new Path(false, -1L, null, null));
             }
         }
         return paths;
