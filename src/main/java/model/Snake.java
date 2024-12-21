@@ -17,7 +17,7 @@ public class Snake {
     }
 
     public Snake(SnakeDTO source) {
-        body = new ArrayList<>();
+        this();
         int orderNum = 0;
         for (Point p : source.geometry) {
             body.add(new Vec(p));

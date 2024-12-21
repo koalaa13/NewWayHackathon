@@ -29,7 +29,7 @@ public class Pathfinder {
                     continue;
                 }
                 long edgeDist = cellWeightCalculator.apply(possibleMove);
-                PlayerSnake newSnake = curState.snake.Clone();
+                PlayerSnake newSnake = curState.snake.HeadSnake();
                 newSnake.Move(possibleDirection);
                 PathState newState = new PathState(newSnake, curState.dist + edgeDist, curState, possibleDirection, possibleMove, curState.stepsMade + 1);
                 queue.add(newState);
