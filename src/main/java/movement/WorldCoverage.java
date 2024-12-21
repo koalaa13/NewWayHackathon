@@ -171,7 +171,7 @@ public class WorldCoverage {
         Vec diff = p.diff(humanSnake.Head());
         if (notNear) {
             long dst = p.dist(humanSnake.Head());
-            if (dst < 100 && ((System.currentTimeMillis() / 1000) % 30 < 10)) {
+            if (dst < 100 && ((System.currentTimeMillis() / 1000) % 40 < 20)) {
                 return null;
             }
         }
@@ -220,7 +220,7 @@ public class WorldCoverage {
         for (var cell : allFood) {
             if (!paths.containsKey(cell.food.c)) continue;
             var res = getPathProps(cell, paths.get(cell.food.c));
-            double reward = (cell.food.points + 5 - res.getValue().getKey()) * res.getValue().getValue();
+            double reward = (2 * cell.food.points + 2 - res.getValue().getKey()) * res.getValue().getValue();
             if (best == null || reward > bestReward) {
                 best = cell;
                 bestDir = res;
