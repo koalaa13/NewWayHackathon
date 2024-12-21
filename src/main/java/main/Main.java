@@ -42,7 +42,7 @@ public class Main {
             if (!mapAfterRequest.errors.isEmpty()) {
                 System.out.println("Errors: " + String.join(" | ", mapAfterRequest.errors));
             }
-            Thread.sleep(mapAfterRequest.tickRemainMs);
+            Thread.sleep(mapAfterRequest.tickRemainMs - 30);
         }
     }
 }

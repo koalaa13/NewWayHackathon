@@ -171,7 +171,7 @@ public class WorldCoverage {
         Vec center = savedMapInfo.mapCenter();
         Vec diff = center.diff(humanSnake.Head());
         long dst = center.dist(humanSnake.Head());
-        if (dst < 150) {
+        if (dst < 100) {
             return null;
         }
         List<Vec> cands = new ArrayList<>();
@@ -202,10 +202,10 @@ public class WorldCoverage {
         }
         var moveMaker = new MoveMaker(v -> {
             var t = cellInfos.get(v);
-            if (t != null) {
+            if (t != null && !t.blocked) {
                 return 1L + (long) (cellInfos.get(v).probBusy * 4L);
             } else {
-                return 20L;
+                return 100L;
             }
         });
         var foodCoords = allFood.stream().map(c -> c.food.c).toList();
