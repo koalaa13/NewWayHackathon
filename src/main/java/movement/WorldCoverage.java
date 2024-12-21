@@ -196,13 +196,13 @@ public class WorldCoverage {
         }
         List<CellInfo> allFood = new ArrayList<>();
         for (var cell : cellInfos.values()) {
-            if (cell.food != null) {
+            if (cell.food != null && !cell.blocked) {
                 allFood.add(cell);
             }
         }
         var moveMaker = new MoveMaker(v -> {
             var t = cellInfos.get(v);
-            if (t != null && !t.blocked) {
+            if (t != null) {
                 return 1L + (long) (cellInfos.get(v).probBusy * 4L);
             } else {
                 return 100L;
