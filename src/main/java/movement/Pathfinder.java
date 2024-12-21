@@ -15,6 +15,7 @@ public class Pathfinder {
         Map<Vec, Path> paths = new HashMap<>();
         Map<Vec, PathState> best = new HashMap<>();
         Queue<PathState> queue = new ArrayDeque<>();
+        for (var snake : snakes) obstacles.addAll(snake.body);
         queue.add(start);
         best.put(initialSnake.Head(), start);
         while (!queue.isEmpty()) {
@@ -59,14 +60,6 @@ public class Pathfinder {
         if (obstacles.contains(dst)) {
             return true;
         }
-        boolean occupied = false;
-        for (var snake : snakes) {
-            if (snake.bodyOrder.containsKey(dst)) {
-                int ordNum = snake.bodyOrder.get(dst);
-                int shiftStep = snake.body.size() - ordNum + 1;
-                occupied |= state.stepsMade < shiftStep;
-            }
-        }
-        return occupied;
+        return false;
     }
 }
