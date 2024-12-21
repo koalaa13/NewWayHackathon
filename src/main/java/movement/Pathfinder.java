@@ -14,15 +14,11 @@ public class Pathfinder {
         PathState start = new PathState(initialSnake.Head());
         Map<Vec, Path> paths = new HashMap<>();
         Map<Vec, PathState> best = new HashMap<>();
-        TreeSet<PathState> queue = new TreeSet<>(
-                Comparator.comparingLong((PathState a) -> a.dist)
-                        .thenComparingLong((PathState a) -> a.snake.x)
-                        .thenComparingLong((PathState a) -> a.snake.y)
-                        .thenComparingLong((PathState a) -> a.snake.z));
+        Queue<PathState> queue = new ArrayDeque<>();
         queue.add(start);
         best.put(initialSnake.Head(), start);
         while (!queue.isEmpty()) {
-            PathState curState = queue.removeFirst();
+            PathState curState = queue.poll();
             if (destinations.contains(curState.snake)) {
                 paths.put(curState.snake, curState.recover());
             }
@@ -34,12 +30,8 @@ public class Pathfinder {
                 if (isDestinationOccupied(possibleMove, curState, obstacles, snakes, mapMin, mapMax)) {
                     continue;
                 }
-                long edgeDist = cellWeightCalculator.apply(possibleMove);
+                long edgeDist = 1L;
                 if (!best.containsKey(possibleMove) || (best.containsKey(possibleMove) && best.get(possibleMove).dist > curState.dist + edgeDist)) {
-                    if (best.containsKey(possibleMove)) {
-                        queue.remove(best.get(possibleMove));
-                    }
-                    best.remove(possibleMove);
                     PathState newState = new PathState(
                             possibleMove,
                             curState.dist + edgeDist,
