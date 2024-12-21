@@ -129,7 +129,6 @@ public class WorldCoverage {
         humanSnake = snake;
         savedMapInfo = mapInfo;
         cellInfos = new HashMap<>();
-        System.out.println(min + " " + max);
         for (long x = min.x; x <= max.x; x++) {
             for (long y = min.y; y <= max.y; y++) {
                 for (long z = min.z; z <= max.z; z++) {
@@ -163,10 +162,9 @@ public class WorldCoverage {
     }
 
     public Pair<Vec, Pair<Integer, Double>> getPathProps(CellInfo cell, Path path) {
-        var sz = path.steps.size();
-        long cntBefore = cell.enemyDists.stream().filter(d -> d <= sz).count();
+        long cntBefore = cell.enemyDists.stream().filter(d -> d <= path.dist).count();
         double prior = 1.0 / pow3(Math.min(cntBefore, 4L));
-        return new Pair<>(path.steps.getFirst(), new Pair<>((int) path.dist, prior));
+        return new Pair<>(path.firstDirection, new Pair<>((int) path.dist, prior));
     }
 
     public Vec getDirection() {
@@ -188,7 +186,7 @@ public class WorldCoverage {
         var paths = moveMaker.makeMoveTowardsTo(humanSnake, min, max, foodCoords, savedMapInfo);
         CellInfo best = null;
         double bestReward = 0.0;
-        Vec bestDir = null;
+        Pair<Vec, Pair<Integer, Double>> bestDir = null;
         System.out.println("Paths found for " + paths.size() + "/" + allFood.size() + " foods");
         for (var cell : allFood) {
             if (!paths.containsKey(cell.food.c)) continue;
@@ -196,7 +194,7 @@ public class WorldCoverage {
             double reward = cell.food.points * 1.0 / res.getValue().getKey() * res.getValue().getValue();
             if (best == null || reward > bestReward) {
                 best = cell;
-                bestDir = res.getKey();
+                bestDir = res;
                 bestReward = reward;
             }
         }
@@ -212,7 +210,15 @@ public class WorldCoverage {
             System.out.println("ASSERT. NO MOVES. JUST SKIP");
             return null;
         } else {
-            return bestDir;
+            System.out.println("Selected food: dist=" + bestDir.getValue().getKey());
+            {
+                var sp = humanSnake.Head().shift(bestDir.getKey());
+                var v = cellInfos.get(sp);
+                if (v != null && v.blocked) {
+                    System.out.println("ASSERT. GO TO WALL");
+                }
+            }
+            return bestDir.getKey();
         }
     }
 }
