@@ -60,6 +60,10 @@ public class Vec {
                 Math.min(z / BC * BC + 2L * BC, mapSize.z) - 1);
     }
 
+    public boolean inRange(Vec min, Vec max) {
+        return min.x <= x && x <= max.x && min.y <= y && y <= max.y && min.z <= z && z <= max.z;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

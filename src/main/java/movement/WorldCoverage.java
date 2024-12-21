@@ -1,18 +1,19 @@
 package movement;
 
-import model.PlayerSnake;
-import model.Point;
-import model.PreparedMapInfo;
-import model.Vec;
+import javafx.util.Pair;
+import model.*;
+import util.VecUtil;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.*;
 
 public class WorldCoverage {
-    public class CellInfo {
+    private static final double MAX_ETEN_PROB = 0.8;
+
+    public static class CellInfo {
         double probBusy = 0.0;
         boolean blocked = false;
+        Food food = null;
+        List<Integer> enemyDists = new ArrayList<>();
 
         public void setBlocked() {
             probBusy = 1.0;
@@ -68,6 +69,38 @@ public class WorldCoverage {
         }
     }
 
+    private Pair<Integer, List<Food>> getBfsNearestFood(Vec point) {
+        int distLimit = -1;
+        List<Food> res = new ArrayList<>();
+
+        int pos = 0;
+        Set<Vec> used = new HashSet<>();
+        List<Vec> queueP = new ArrayList<>();
+        List<Integer> queueD = new ArrayList<>();
+        used.add(point);
+        queueD.add(0);
+        queueP.add(point);
+        while (pos < queueP.size()) {
+            var d = queueD.get(pos);
+            var e = queueP.get(pos);
+            if (distLimit >= 0 && d > distLimit) break;
+            var f = cellInfos.get(e).food;
+            if (f != null) {
+                distLimit = d;
+                res.add(f);
+            }
+            pos++;
+            for (var shift : VecUtil.turns) {
+                var cand = e.shift(shift);
+                if (!used.contains(cand) && e.inRange(min, max) && !cellInfos.get(cand).blocked) {
+                    queueP.add(cand);
+                    queueD.add(d + 1);
+                }
+            }
+        }
+        return new Pair<>(distLimit, res);
+    }
+
     public WorldCoverage(PlayerSnake snake, PreparedMapInfo mapInfo) {
         var head = snake.Head();
         min = head.prevBlockStart();
@@ -80,10 +113,25 @@ public class WorldCoverage {
                 }
             }
         }
+        mapInfo.food.forEach(f -> {
+            if (f.c.inRange(min, max)) {
+                cellInfos.get(f.c).food = f;
+            }
+        });
         mapInfo.fences.forEach(v -> cellInfos.get(v).setBlocked());
         mapInfo.snakes.forEach(s -> s.body.forEach(v -> cellInfos.get(v).setBlocked()));
         mapInfo.enemies.forEach(s -> s.body.forEach(v -> cellInfos.get(v).setBlocked()));
         mapInfo.enemies.forEach(s -> fillWithProb(s.body.getFirst()));
+        mapInfo.enemies.forEach(s -> {
+            var h = s.body.getFirst();
+            var res = getBfsNearestFood(h);
+            var foods = res.getValue();
+            var dst = res.getKey();
+            if (!foods.isEmpty()) {
+                foods.sort(Comparator.comparingInt(o -> o.points));
+                foods.forEach(f -> cellInfos.get(f.c).enemyDists.add(dst));
+            }
+        });
     }
 
     public Vec getDirection() {
