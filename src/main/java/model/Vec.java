@@ -36,6 +36,10 @@ public class Vec {
         return new Vec(x + v.x, y + v.y, z + v.z);
     }
 
+    public long dist(Vec v) {
+        return Math.abs(x - v.x) + Math.abs(y - v.y) + Math.abs(z - v.z);
+    }
+
     public Point toPoint() {
         return new Point(List.of((int) x, (int) y, (int) z));
     }

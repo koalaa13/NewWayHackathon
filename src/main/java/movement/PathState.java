@@ -14,13 +14,24 @@ public class PathState {
     public PathState parent;
     public Vec lastMove;
     public Vec lastDirection;
+    public int stepsMade;
 
-    public PathState(PlayerSnake snake, long dist, PathState parent, Vec lastMove, Vec lastDirection) {
+    public PathState(PlayerSnake snake) {
+        this.snake = snake;
+        this.dist = 0L;
+        this.parent = null;
+        this.lastMove = null;
+        this.lastDirection = null;
+        this.stepsMade = 0;
+    }
+
+    public PathState(PlayerSnake snake, long dist, PathState parent, Vec lastMove, Vec lastDirection, int stepsMade) {
         this.snake = snake;
         this.dist = dist;
         this.parent = parent;
         this.lastMove = lastMove;
         this.lastDirection = lastDirection;
+        this.stepsMade = stepsMade;
     }
 
     public Path recover() {
@@ -43,14 +54,11 @@ public class PathState {
         if (o == null || getClass() != o.getClass()) return false;
         PathState pathState = (PathState) o;
         return dist == pathState.dist &&
-                Objects.equals(snake, pathState.snake) &&
-                Objects.equals(parent, pathState.parent) &&
-                Objects.equals(lastMove, pathState.lastMove) &&
-                Objects.equals(lastDirection, pathState.lastDirection);
+                Objects.equals(snake, pathState.snake);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(snake, dist, parent, lastMove, lastDirection);
+        return Objects.hash(snake, dist);
     }
 }

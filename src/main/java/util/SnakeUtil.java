@@ -12,19 +12,19 @@ public class SnakeUtil {
         res.add(snake.direction);
         if (snake.direction.x != 0) {
             res.addAll(VecUtil.turnsAlongX());
-            if (snake.body.size() == 1) {
+            if (snake.body.size() == 1 && !snake.croppedGhost) {
                 res.add(VecUtil.XN);
             }
         }
         if (snake.direction.y != 0) {
             res.addAll(VecUtil.turnsAlongY());
-            if (snake.body.size() == 1) {
+            if (snake.body.size() == 1 && !snake.croppedGhost) {
                 res.add(VecUtil.YN);
             }
         }
         if (snake.direction.z != 0) {
             res.addAll(VecUtil.turnsAlongZ());
-            if (snake.body.size() == 1) {
+            if (snake.body.size() == 1 && !snake.croppedGhost) {
                 res.add(VecUtil.ZN);
             }
         }
