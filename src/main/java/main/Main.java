@@ -27,11 +27,14 @@ public class Main {
             for (var snake : preparedMapInfo.snakes) {
                 var worldCoverage = new WorldCoverage(snake, preparedMapInfo);
                 System.out.println("Got world of " + snake.id);
-                var requestItem = new RequestItemDTO();
-                requestItem.id = snake.id;
-                requestItem.direction = worldCoverage.getDirection().toPoint();
-                System.out.println("Got direction of " + snake.id);
-                snakesDirections.add(requestItem);
+                var direction =  worldCoverage.getDirection();
+                if (direction != null) {
+                    var requestItem = new RequestItemDTO();
+                    requestItem.id = snake.id;
+                    requestItem.direction = direction.toPoint();
+                    System.out.println("Got direction of " + snake.id);
+                    snakesDirections.add(requestItem);
+                }
             }
             request.snakes = snakesDirections;
             System.out.println("Total time: " + (System.currentTimeMillis() - startTime));

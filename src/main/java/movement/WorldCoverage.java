@@ -156,7 +156,7 @@ public class WorldCoverage {
             var foods = res.getValue();
             var dst = res.getKey();
             if (!foods.isEmpty()) {
-                foods.sort(Comparator.comparingInt(o -> o.points));
+//                foods.sort(Comparator.comparingInt(o -> o.points));
                 foods.forEach(f -> cellInfos.get(f.c).enemyDists.add(dst));
             }
         });
@@ -165,7 +165,7 @@ public class WorldCoverage {
     public Pair<Vec, Pair<Integer, Double>> getPathProps(CellInfo cell, Path path) {
         var sz = path.steps.size();
         long cntBefore = cell.enemyDists.stream().filter(d -> d <= sz).count();
-        double prior = 1.0 / pow3(Math.min(cntBefore, 5L));
+        double prior = 1.0 / pow3(Math.min(cntBefore, 4L));
         return new Pair<>(path.steps.getFirst(), new Pair<>((int) path.dist, prior));
     }
 
@@ -189,9 +189,8 @@ public class WorldCoverage {
         CellInfo best = null;
         double bestReward = 0.0;
         Vec bestDir = null;
-        System.out.println(allFood.size());
+        System.out.println("Paths found for " + paths.size() + "/" + allFood.size() + " foods");
         for (var cell : allFood) {
-            System.out.println("cell");
             if (!paths.containsKey(cell.food.c)) continue;
             var res = getPathProps(cell, paths.get(cell.food.c));
             double reward = cell.food.points * 1.0 / res.getValue().getKey() * res.getValue().getValue();
@@ -201,6 +200,19 @@ public class WorldCoverage {
                 bestReward = reward;
             }
         }
-        return bestDir;
+        if (best == null) {
+            System.out.println("Best direction is not defined. Choose any safe");
+            for (var turn : VecUtil.turns) {
+                var sp = humanSnake.Head().shift(turn);
+                var v = cellInfos.get(sp);
+                if (v != null && !v.blocked) {
+                    return turn;
+                }
+            }
+            System.out.println("ASSERT. NO MOVES. JUST SKIP");
+            return null;
+        } else {
+            return bestDir;
+        }
     }
 }
